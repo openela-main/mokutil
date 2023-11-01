@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tyler Hicks <tyhicks@canonical.com>
+Date: Mon, 20 Jun 2016 11:18:17 -0500
+Subject: [PATCH] Fix typo in error message when the system lacks Secure Boot
+ support
+
+Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+---
+ src/mokutil.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/mokutil.c b/src/mokutil.c
+index d554f6c..27f1292 100644
+--- a/src/mokutil.c
++++ b/src/mokutil.c
+@@ -2297,7 +2297,7 @@ main (int argc, char *argv[])
+ 		rc = efi_get_variable (efi_guid_global, "SecureBoot",
+ 				       &data, &data_size, &attributes);
+ 		if (rc < 0) {
+-			fprintf(stderr, "This system does't support Secure Boot\n");
++			fprintf(stderr, "This system doesn't support Secure Boot\n");
+ 			ret = -1;
+ 			goto out;
+ 		}

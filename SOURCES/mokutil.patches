@@ -1,0 +1,13 @@
+Patch0001: 0001-Fix-the-potential-buffer-overflow.patch
+Patch0002: 0002-Fix-the-32bit-signedness-comparison.patch
+Patch0003: 0003-Build-with-fshort-wchar-so-toggle-passwords-work-rig.patch
+Patch0004: 0004-Don-t-allow-sha1-on-the-mokutil-command-line.patch
+Patch0005: 0005-Make-all-efi_guid_t-const.patch
+Patch0006: 0006-mokutil-be-explicit-about-file-modes-in-all-cases.patch
+Patch0007: 0007-Add-bash-completion-file.patch
+Patch0008: 0008-Fix-typo-in-error-message-when-the-system-lacks-Secu.patch
+Patch0009: 0009-list_keys_in_var-check-errno-correctly-not-ret-twice.patch
+Patch0010: 0010-generate_hash-generate_pw_hash-don-t-use-strlen-for-.patch
+Patch0011: 0011-Fix-a-integer-comparison-sign-issue.patch
+Patch0012: 0012-initial-mok-variables-code.patch
+Patch0013: 0013-mokutil-enable-setting-fallback-verbosity-and-norebo.patch

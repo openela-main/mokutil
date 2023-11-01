@@ -1,0 +1,193 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Renaud=20M=C3=A9trich?= <rmetrich@redhat.com>
+Date: Fri, 3 Dec 2021 14:18:31 +0100
+Subject: [PATCH] mokutil: enable setting fallback verbosity and noreboot mode
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Having mokutil handle FALLBACK_VERBOSE and FB_NO_REBOOT variables eases
+fallback debugging.
+
+Signed-off-by: Renaud Métrich <rmetrich@redhat.com>
+(cherry picked from commit 57bc385827e7c0e0c86f30bbfa2d48ca9505537e)
+(cherry picked from commit 99d3990bdbbca0419dc97133f27d6932b3234224)
+[rharwood: no sb_check, no util renaming]
+(cherry picked from commit 157a0969bdb5e7df152b4241f90b48209c235f2f)
+[rharwood: flags are sparse now]
+---
+ src/mokutil.c | 70 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ data/mokutil  |  8 +++++++
+ man/mokutil.1 | 10 +++++++++
+ 3 files changed, 88 insertions(+)
+
+diff --git a/src/mokutil.c b/src/mokutil.c
+index 838599c..1cec4e9 100644
+--- a/src/mokutil.c
++++ b/src/mokutil.c
+@@ -83,6 +83,8 @@
+ #define IMPORT_HASH        (1 << 21)
+ #define DELETE_HASH        (1 << 22)
+ #define VERBOSITY          (1 << 23)
++#define FB_VERBOSITY       (1 << 25)
++#define FB_NOREBOOT        (1 << 26)
+ 
+ #define DEFAULT_CRYPT_METHOD SHA512_BASED
+ #define DEFAULT_SALT_SIZE    SHA512_SALT_MAX
+@@ -152,6 +154,8 @@ print_help ()
+ 	printf ("  --import-hash <hash>\t\t\tImport a hash into MOK or MOKX\n");
+ 	printf ("  --delete-hash <hash>\t\t\tDelete a hash in MOK or MOKX\n");
+ 	printf ("  --set-verbosity <true/false>\t\tSet the verbosity bit for shim\n");
++	printf ("  --set-fallback-verbosity <true/false>\t\tSet the verbosity bit for fallback\n");
++	printf ("  --set-fallback-noreboot <true/false>\t\tPrevent fallback from automatically rebooting\n");
+ 	printf ("  --pk\t\t\t\t\tList the keys in PK\n");
+ 	printf ("  --kek\t\t\t\t\tList the keys in KEK\n");
+ 	printf ("  --db\t\t\t\t\tList the keys in db\n");
+@@ -2135,6 +2139,46 @@ set_verbosity (uint8_t verbosity)
+ 	return 0;
+ }
+ 
++static int
++set_fallback_verbosity (const uint8_t verbosity)
++{
++	if (verbosity) {
++		uint32_t attributes = EFI_VARIABLE_NON_VOLATILE
++				      | EFI_VARIABLE_BOOTSERVICE_ACCESS
++				      | EFI_VARIABLE_RUNTIME_ACCESS;
++		if (efi_set_variable (efi_guid_shim, "FALLBACK_VERBOSE",
++				      (uint8_t *)&verbosity, sizeof (verbosity),
++				      attributes, S_IRUSR | S_IWUSR) < 0) {
++			fprintf (stderr, "Failed to set FALLBACK_VERBOSE\n");
++			return -1;
++		}
++	} else {
++		return test_and_delete_var ("FALLBACK_VERBOSE");
++	}
++
++	return 0;
++}
++
++static int
++set_fallback_noreboot (const uint8_t noreboot)
++{
++	if (noreboot) {
++		uint32_t attributes = EFI_VARIABLE_NON_VOLATILE
++				      | EFI_VARIABLE_BOOTSERVICE_ACCESS
++				      | EFI_VARIABLE_RUNTIME_ACCESS;
++		if (efi_set_variable (efi_guid_shim, "FB_NO_REBOOT",
++				      (uint8_t *)&noreboot, sizeof (noreboot),
++				      attributes, S_IRUSR | S_IWUSR) < 0) {
++			fprintf (stderr, "Failed to set FB_NO_REBOOT\n");
++			return -1;
++		}
++	} else {
++		return test_and_delete_var ("FB_NO_REBOOT");
++	}
++
++	return 0;
++}
++
+ static inline int
+ list_db (DBName db_name)
+ {
+@@ -2169,6 +2213,8 @@ main (int argc, char *argv[])
+ 	unsigned int command = 0;
+ 	int use_root_pw = 0;
+ 	uint8_t verbosity = 0;
++	uint8_t fb_verbosity = 0;
++	uint8_t fb_noreboot = 0;
+ 	DBName db_name = MOK_LIST_RT;
+ 	int ret = -1;
+ 
+@@ -2207,6 +2253,8 @@ main (int argc, char *argv[])
+ 			{"import-hash",        required_argument, 0, 0  },
+ 			{"delete-hash",        required_argument, 0, 0  },
+ 			{"set-verbosity",      required_argument, 0, 0  },
++			{"set-fallback-verbosity", required_argument, 0, 0  },
++			{"set-fallback-noreboot", required_argument, 0, 0  },
+ 			{"pk",                 no_argument,       0, 0  },
+ 			{"kek",                no_argument,       0, 0  },
+ 			{"db",                 no_argument,       0, 0  },
+@@ -2270,6 +2318,22 @@ main (int argc, char *argv[])
+ 					verbosity = 0;
+ 				else
+ 					command |= HELP;
++			} else if (strcmp (option, "set-fallback-verbosity") == 0) {
++				command |= FB_VERBOSITY;
++				if (strcmp (optarg, "true") == 0)
++					fb_verbosity = 1;
++				else if (strcmp (optarg, "false") == 0)
++					fb_verbosity = 0;
++				else
++					command |= HELP;
++			} else if (strcmp (option, "set-fallback-noreboot") == 0) {
++				command |= FB_NOREBOOT;
++				if (strcmp (optarg, "true") == 0)
++					fb_noreboot = 1;
++				else if (strcmp (optarg, "false") == 0)
++					fb_noreboot = 0;
++				else
++					command |= HELP;
+ 			} else if (strcmp (option, "pk") == 0) {
+ 				if (db_name != MOK_LIST_RT) {
+ 					command |= HELP;
+@@ -2557,6 +2621,12 @@ main (int argc, char *argv[])
+ 		case VERBOSITY:
+ 			ret = set_verbosity (verbosity);
+ 			break;
++		case FB_VERBOSITY:
++			ret = set_fallback_verbosity (fb_verbosity);
++			break;
++		case FB_NOREBOOT:
++			ret = set_fallback_noreboot (fb_noreboot);
++			break;
+ 		default:
+ 			print_help ();
+ 			break;
+diff --git a/data/mokutil b/data/mokutil
+index 800b039..af6b6ff 100755
+--- a/data/mokutil
++++ b/data/mokutil
+@@ -24,6 +24,14 @@ _mokutil()
+ 		COMPREPLY=( $( compgen -W "true false") )
+ 		return 0
+ 		;;
++	--set-fallback-verbosity)
++		COMPREPLY=( $( compgen -W "true false") )
++		return 0
++		;;
++	--set-fallback-noreboot)
++		COMPREPLY=( $( compgen -W "true false") )
++		return 0
++		;;
+ 	--generate-hash|-g)
+ 		COMPREPLY=( $( compgen -o nospace -P= -W "") )
+ 		return 0
+diff --git a/man/mokutil.1 b/man/mokutil.1
+index 25fe8b4..30dcfb2 100644
+--- a/man/mokutil.1
++++ b/man/mokutil.1
+@@ -65,6 +65,10 @@ mokutil \- utility to manipulate machine owner keys
+ .br
+ \fBmokutil\fR [--set-verbosity (\fItrue\fR | \fIfalse\fR)]
+ .br
++\fBmokutil\fR [--set-fallback-verbosity (\fItrue\fR | \fIfalse\fR)]
++.br
++\fBmokutil\fR [--set-fallback-noreboot (\fItrue\fR | \fIfalse\fR)]
++.br
+ \fBmokutil\fR [--pk]
+ .br
+ \fBmokutil\fR [--kek]
+@@ -161,6 +165,12 @@ this is not the password hash.
+ \fB--set-verbosity\fR
+ Set the SHIM_VERBOSE to make shim more or less verbose
+ .TP
++\fB--set-fallback-verbosity\fR
++Set the FALLBACK_VERBOSE to make fallback more or less verbose
++.TP
++\fB--set-fallback-noreboot\fR
++Set the FB_NO_REBOOT to prevent fallback from automatically rebooting the system
++.TP
+ \fB--pk\fR
+ List the keys in the public Platform Key (PK)
+ .TP

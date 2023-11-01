@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Peter Jones <pjones@redhat.com>
+Date: Mon, 3 Apr 2017 16:33:38 -0400
+Subject: [PATCH] list_keys_in_var(): check errno correctly, not ret twice.
+
+Signed-off-by: Peter Jones <pjones@redhat.com>
+---
+ src/mokutil.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/mokutil.c b/src/mokutil.c
+index 27f1292..0be9e84 100644
+--- a/src/mokutil.c
++++ b/src/mokutil.c
+@@ -602,7 +602,7 @@ list_keys_in_var (const char *var_name, const efi_guid_t guid)
+ 
+ 	ret = efi_get_variable (guid, var_name, &data, &data_size, &attributes);
+ 	if (ret < 0) {
+-		if (ret == ENOENT) {
++		if (errno == ENOENT) {
+ 			printf ("%s is empty\n", var_name);
+ 			return 0;
+ 		}
