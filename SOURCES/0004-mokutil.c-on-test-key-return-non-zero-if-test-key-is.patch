@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leo Sandoval <lsandova@redhat.com>
+Date: Thu, 24 Apr 2025 12:49:29 -0600
+Subject: [PATCH] mokutil.c: on --test-key, return non-zero if test key is not
+ enrolled
+
+Aligns with the same behaviour as other common UNIX tools,
+e.g. 'command -v program' returns 0 if program exists, non-zero if not
+
+Signed-off-by: Leo Sandoval <lsandova@redhat.com>
+---
+ src/mokutil.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/mokutil.c b/src/mokutil.c
+index 988b060..e40579b 100644
+--- a/src/mokutil.c
++++ b/src/mokutil.c
+@@ -1567,7 +1567,7 @@ test_key (const MokRequest req, const char *key_file)
+ 
+ 	if (is_valid_request (&efi_guid_x509_cert, key, read_size, req)) {
+ 		printf ("%s is not enrolled\n", key_file);
+-		ret = 0;
++		ret = 1;
+ 	} else {
+ 		print_skip_message (key_file, key, read_size, req);
+ 		ret = 1;

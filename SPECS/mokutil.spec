@@ -1,6 +1,6 @@
 Name:           mokutil
 Version:        0.7.2
-Release:        1%{?dist}
+Release:        4%{?dist}
 Epoch:          2
 Summary:        Tool to manage UEFI Secure Boot MoK Keys
 License:        GPLv3+
@@ -47,6 +47,21 @@ mokutil provides a tool to manage keys for Secure Boot through the MoK
 %{_datadir}/bash-completion/completions/mokutil
 
 %changelog
+* Tue Dec 09 2025 Leo Sandoval <lsandova@redhat.com> - 0.7.2-4
+- Bump release
+- Resolves: #RHEL-90837
+
+* Fri Jun 27 2025 Leo Sandoval <lsandova@redhat.com> - 0.7.2-3
+- Return zero in case --test-key is enrolled
+- Resolves: #RHEL-90837
+
+* Mon May 12 2025 Leo Sandoval <lsandova@redhat.com> - 0.7.2-2
+- Rebase several patches from upstream which:
+  - Introduce --is-sb-enabled parameter and better return codes
+  - Remove unused int_to_b64()
+  - Show help on unsupported systems
+- Resolves: #RHEL-90837
+
 * Mon Apr 28 2025 Leo Sandoval <lsandova@redhat.com> - 0.7.2-1
 - Bump version to 0.7.2 upstream tag
 - Resolves: #RHEL-88741

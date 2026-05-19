@@ -1,0 +1,6 @@
+Patch0001: 0001-mokutil.c-show-help-if-no-args-or-help-even-on-unsup.patch
+Patch0002: 0002-mokutil-fix-a-typo-mock.patch
+Patch0003: 0003-mokutil-remove-unused-int_to_b64.patch
+Patch0004: 0004-mokutil.c-on-test-key-return-non-zero-if-test-key-is.patch
+Patch0005: 0005-mokutil-introduce-is-sb-enabled-parameter.patch
+Patch0006: 0006-return-zero-in-case-test-key-is-enrolled.patch
