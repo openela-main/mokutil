@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Leo Sandoval <lsandova@redhat.com>
+Date: Fri, 27 Jun 2025 17:28:58 -0600
+Subject: [PATCH] return zero in case --test-key is enrolled
+
+Otherwise it returns non-zero even if key is enrolled, indicating a
+negative result.
+
+With this change, the --test-key return code would be following
+
+    [root@localhost ~]# mokutil --test-key sb_cert.cer
+    sb_cert.cer is already enrolled
+    [root@localhost ~]# echo $?
+    0
+
+instead of
+
+    [root@localhost ~]# mokutil --test-key sb_cert.cer
+    sb_cert.cer is already enrolled
+    [root@localhost ~]# echo $?
+    1
+
+Signed-off-by: Leo Sandoval <lsandova@redhat.com>
+---
+ src/mokutil.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/mokutil.c b/src/mokutil.c
+index 918ca06..368524b 100644
+--- a/src/mokutil.c
++++ b/src/mokutil.c
+@@ -1590,7 +1590,7 @@ test_key (const MokRequest req, const char *key_file)
+ 		ret = 1;
+ 	} else {
+ 		print_skip_message (key_file, key, read_size, req);
+-		ret = 1;
++		ret = 0;
+ 	}
+ 
+ error:

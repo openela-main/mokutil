@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Gary Lin <glin@suse.com>
+Date: Mon, 28 Apr 2025 18:18:00 +0800
+Subject: [PATCH] mokutil: fix a typo 'mock'
+
+'mock' is the typo of 'MOK'. Since efi_variables_supported() checks the
+EFI variable support of the system, correct the comment to match the
+code.
+
+Signed-off-by: Gary Lin <glin@suse.com>
+---
+ src/mokutil.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/mokutil.c b/src/mokutil.c
+index 2da211d..988b060 100644
+--- a/src/mokutil.c
++++ b/src/mokutil.c
+@@ -2169,7 +2169,7 @@ main (int argc, char *argv[])
+ 		goto out;
+ 	}
+ 
+-	/* check if mock is supported on the system */
++	/* check if EFI variable is supported on the system */
+ 	if (!efi_variables_supported ()) {
+ 		fprintf (stderr, "EFI variables are not supported on this system\n");
+ 		exit (1);
