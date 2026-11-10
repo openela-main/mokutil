@@ -1,6 +1,6 @@
 Name:           mokutil
 Version:        0.7.2
-Release:        4%{?dist}
+Release:        6%{?dist}
 Epoch:          2
 Summary:        Tool to manage UEFI Secure Boot MoK Keys
 License:        GPLv3+
@@ -20,7 +20,7 @@ BuildRequires:  make
 BuildRequires:  openssl
 BuildRequires:  openssl-devel
 Conflicts:      shim < 0.8-1%{?dist}
-Obsoletes:      mokutil < 0.2.0
+Obsoletes:      mokutil < 1:0.2.0
 
 %include %{SOURCE1}
 
@@ -47,6 +47,14 @@ mokutil provides a tool to manage keys for Secure Boot through the MoK
 %{_datadir}/bash-completion/completions/mokutil
 
 %changelog
+* Mon Aug 31 2026 Nicolas Frayer <nfrayer@redhat.com> - 0.7.2-6
+- PasswordCrypt: Fix an ABI issue
+- Resolves: #RHEL-214023
+
+* Thu Jul 02 2026 Nicolas Frayer <nfrayer@redhat.com> - 0.7.2-5
+- Remove MD5 and DES password support
+- Resolves: #RHEL-191432
+
 * Tue Dec 09 2025 Leo Sandoval <lsandova@redhat.com> - 0.7.2-4
 - Bump release
 - Resolves: #RHEL-90837
